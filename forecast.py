@@ -4,45 +4,53 @@ from datetime import date, datetime, time
 from country_codes import codes
 import calendar
 
-
+# get api key from local system
 key = os.environ.get('WEATHER_KEY')
 base_url = 'http://api.openweathermap.org/data/2.5/forecast'
 
 
 def main():
     location = get_location()
+    # get forecast for specific location
     weather_data, error = get_forecast(location, key)
 
     if error:
         print('Sorry, could not get weather')
     else:
+        # get the list of 5-day forecast which contains 3-hour interval data
         list_of_forecasts = weather_data['list']
 
         for forecast in list_of_forecasts:
+            # for each interval, get specific data to show details to user
             get_forecast_info = get_forecast_details(forecast)
-            # print(f'{location}\n{get_forecast_info}')
             print(get_forecast_info)
 
 
 def get_location():
     city, country_code = '', ''
+
+    # ask user city to look for
     while len(city) == 0 or not city.isalpha():
         city = input('Enter the city name: ').strip()
 
     country_name = ''
+    # get country name from user
     while len(country_name) <= 4 or not country_name.isalpha():
         country_name = input('Enter country name: ')
-        print(country_name)
-    print(country_name)
 
-    for country in codes:
-        if country['Name'].lower == country_name.lower():
-            country_code = country['Code']
-            print(country_code)
+    # user country name provided by user to find 2-letter codes list
+    country_code = get_country_code(country_name)
 
-    print(country_code)
     location = f'{city},{country_code}'
     return location
+
+
+def get_country_code(country_name):
+    for country in codes:
+        if country['Name'] == country_name.title():
+            code = country['Code']
+
+            return code
 
 
 def get_forecast(location, key):
