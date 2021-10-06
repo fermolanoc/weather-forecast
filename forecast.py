@@ -1,6 +1,6 @@
 import requests
 import os
-from datetime import date, datetime, time
+from datetime import datetime
 from country_codes import codes
 import calendar
 
@@ -17,13 +17,7 @@ def main():
     if error:
         print('Sorry, could not get weather')
     else:
-        # get the list of 5-day forecast which contains 3-hour interval data
-        list_of_forecasts = weather_data['list']
-
-        for forecast in list_of_forecasts:
-            # for each interval, get specific data to show details to user
-            get_forecast_info = get_forecast_details(forecast)
-            print(get_forecast_info)
+        get_results(location, weather_data)
 
 
 def get_location():
@@ -54,7 +48,6 @@ def get_country_code(country_name):
 
 
 def get_forecast(location, key):
-
     try:
         units = 'imperial'
         query = {'q': location, 'units': units, 'appid': key}
@@ -65,7 +58,7 @@ def get_forecast(location, key):
         return data, None
 
     except Exception as ex:
-        print(ex)
+        # print(ex)
         print(response.text)  # added for debugging
         return None, ex
 
@@ -84,10 +77,21 @@ def get_forecast_details(forecast):
         day = calendar.day_name[date_txt.weekday()]
 
         # return temp, timestamp, forecast_date
-        return f'{day} at {forecast_date.time()}: Expect {description}.\nTemperature will be {temp}F with winds speed of {wind_speed} miles/hour\n'
+        return f'{day} at {forecast_date.time()}\nExpect {description}.\nTemperature will be {temp}F with winds speed of {wind_speed} miles/hour\n'
     except Exception as ex:
-        print(ex)
+        print('Error because of ' + ex)
         return ex
+
+
+def get_results(location, weather_data):
+    print(f'\n{location.title()} next 5 days forecast (3-hour interval)\n')
+    # get the list of 5-day forecast which contains 3-hour interval data
+    list_of_forecasts = weather_data['list']
+
+    for forecast in list_of_forecasts:
+        # for each interval, get specific data to show details to user
+        get_forecast_info = get_forecast_details(forecast)
+        print(get_forecast_info)
 
 
 if __name__ == '__main__':
