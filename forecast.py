@@ -2,6 +2,7 @@ import requests
 import os
 from datetime import date, datetime, time
 from country_codes import codes
+import calendar
 
 
 key = os.environ.get('WEATHER_KEY')
@@ -71,9 +72,11 @@ def get_forecast_details(forecast):
         # time details
         timestamp = forecast['dt']
         forecast_date = datetime.fromtimestamp(timestamp)
+        date_txt = forecast_date.date()
+        day = calendar.day_name[date_txt.weekday()]
 
         # return temp, timestamp, forecast_date
-        return f'At {forecast_date.ctime()}: Expect {description}.\nTemperature will be {temp}F with winds speed of {wind_speed}miles/hour\n'
+        return f'{day} at {forecast_date.time()}: Expect {description}.\nTemperature will be {temp}F with winds speed of {wind_speed} miles/hour\n'
     except Exception as ex:
         print(ex)
         return ex
