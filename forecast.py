@@ -29,10 +29,13 @@ def main():
 
 def get_location():
     city, country_code = '', ''
+    city_txt = 'h'
 
     # ask user city to look for
-    while len(city) == 0 or not city.isalpha():
-        city = input('Enter the city name: ').strip()
+    while len(city) == 0 or not city_txt.isalpha():
+        city = input('Enter the city name: ')
+        # removes blank spaces on city name like 'New York' without modifying the name that will be returned
+        city_txt = city.replace(" ", "")
 
     # user country name provided by user to find 2-letter codes list
     country_code = get_country_code()
