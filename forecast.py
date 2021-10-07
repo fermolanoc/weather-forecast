@@ -3,6 +3,12 @@ import os
 from datetime import datetime
 from country_codes import codes
 import calendar
+import logging
+
+
+# basic config for logging messages
+# logging.basicConfig(format='%(process)d-%(levelname)s-%(message)s')
+
 
 # get api key from local system
 key = os.environ.get('WEATHER_KEY')
@@ -27,28 +33,30 @@ def get_location():
     while len(city) == 0 or not city.isalpha():
         city = input('Enter the city name: ').strip()
 
-    country_name = ''
-    # get country name from user
-    while len(country_name) <= 4 or not country_name.isalpha():
-        country_name = input('Enter country name: ')
-
     # user country name provided by user to find 2-letter codes list
-    country_code = get_country_code(country_name)
+    country_code = get_country_code()
 
     location = f'{city},{country_code}'
     return location
 
 
-def get_country_code(country_name):
-    for country in codes:
-        if country['Name'] == country_name.title():
-            code = country['Code']
+def get_country_code():
+    code = ''
+    country_name = ''
+    # get country name from user
+    while len(country_name) <= 4 or len(code) == 0:
+        country_name = input('Enter country name: ')
 
-            return code
+        for country in codes:
+            if country['Name'] == country_name.title():
+                code = country['Code']
+
+    return code
 
 
 def get_forecast(location, key):
     try:
+        # generate a personalized query to combina with base url
         units = 'imperial'
         query = {'q': location, 'units': units, 'appid': key}
 
@@ -76,7 +84,6 @@ def get_forecast_details(forecast):
         date_txt = forecast_date.date()
         day = calendar.day_name[date_txt.weekday()]
 
-        # return temp, timestamp, forecast_date
         return f'{day} at {forecast_date.time()}\nExpect {description}.\nTemperature will be {temp}F with winds speed of {wind_speed} miles/hour\n'
     except Exception as ex:
         print('Error because of ' + ex)
@@ -84,7 +91,7 @@ def get_forecast_details(forecast):
 
 
 def get_results(location, weather_data):
-    print(f'\n{location.title()} next 5 days forecast (3-hour interval)\n')
+    print(f'\n{location.upper()} next 5 days forecast (3-hour interval)\n')
     # get the list of 5-day forecast which contains 3-hour interval data
     list_of_forecasts = weather_data['list']
 
