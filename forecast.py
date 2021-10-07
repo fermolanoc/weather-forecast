@@ -7,7 +7,7 @@ import logging
 
 
 # basic config for logging messages
-# logging.basicConfig(format='%(process)d-%(levelname)s-%(message)s')
+logging.basicConfig(format='%(process)d-%(levelname)s-%(message)s')
 
 
 # get api key from local system
@@ -21,7 +21,8 @@ def main():
     weather_data, error = get_forecast(location, key)
 
     if error:
-        print('Sorry, could not get weather')
+        print(
+            '\nSorry, could not get weather\nPlease verify city and country name are correct')
     else:
         get_results(location, weather_data)
 
@@ -44,7 +45,7 @@ def get_country_code():
     code = ''
     country_name = ''
     # get country name from user
-    while len(country_name) <= 4 or len(code) == 0:
+    while len(country_name) < 4 or len(code) == 0:
         country_name = input('Enter country name: ')
 
         for country in codes:
@@ -67,7 +68,7 @@ def get_forecast(location, key):
 
     except Exception as ex:
         # print(ex)
-        print(response.text)  # added for debugging
+        logging.error(response.text)  # added for debugging
         return None, ex
 
 
@@ -84,10 +85,9 @@ def get_forecast_details(forecast):
         date_txt = forecast_date.date()
         day = calendar.day_name[date_txt.weekday()]
 
-        return f'{day} at {forecast_date.time()}\nExpect {description}.\nTemperature will be {temp}F with winds speed of {wind_speed} miles/hour\n'
-    except Exception as ex:
-        print('Error because of ' + ex)
-        return ex
+        return f'{day} at {forecast_date.time()}\nExpect {description}.\nTemperature will be {temp}F with winds speed of {wind_speed} miles/hour\n', None
+    except Exception as error:
+        return None, error
 
 
 def get_results(location, weather_data):
@@ -97,8 +97,14 @@ def get_results(location, weather_data):
 
     for forecast in list_of_forecasts:
         # for each interval, get specific data to show details to user
-        get_forecast_info = get_forecast_details(forecast)
-        print(get_forecast_info)
+        get_forecast_info, error = get_forecast_details(forecast)
+
+        if error:
+            logging.critical(
+                f'Error: {error} when trying to access data from forecast list')
+            print('There was an error when trying to access the data. Try again later\n')
+        else:
+            print(get_forecast_info)
 
 
 if __name__ == '__main__':
